@@ -5,7 +5,7 @@
     <classes>
       <class name="application.reflektion.ApiAutomationTest">
         <methods>
-          <include name="putRequestTest"/>
+          <include name="geParticularRequestTest"/>
           <include name="beforeTest"/>
         </methods>
       </class> <!-- application.reflektion.ApiAutomationTest -->

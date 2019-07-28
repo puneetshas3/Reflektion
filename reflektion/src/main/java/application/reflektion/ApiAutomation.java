@@ -2,10 +2,12 @@ package application.reflektion;
 
 import org.hamcrest.Matchers;
 import org.testng.Assert;
+import org.testng.Reporter;
 
 import io.restassured.http.ContentType;
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 
 
 
@@ -34,10 +36,8 @@ public class ApiAutomation extends BaseClass
 	public void geParticularRequest() {
 		Response response = httpRequest.get("/posts/1");
 		Assert.assertEquals(response.getStatusCode(), 200);
-		System.out.println("response "+response.asString());
-		//response.then().assertThat().body("size()", Matchers.equalTo(1));
-		response.then().assertThat().body(JsonSchemaValidator.matchesJsonSchemaInClasspath("././resources/post.json"));
-		
+		Reporter.log(response.asString());
+		response.then().assertThat().body(JsonSchemaValidator.matchesJsonSchemaInClasspath("././resources/getParticular.json"));
 		Assert.assertEquals(response.body().jsonPath().getInt("id"), 1);
 	}
 	
@@ -50,7 +50,9 @@ public class ApiAutomation extends BaseClass
 	public void notFoundRequest() {
 		Response response = httpRequest.get("/invalidposts");
 		Assert.assertEquals(response.getStatusCode(), 404);
-		response.then().log().all();
+		Reporter.log("Logs are printed on the console");
+		System.out.println("Logs for Page not found error - Test case invalidRequestTest");
+		System.out.println(response.then().log().all());
 	}
 	
 	
@@ -62,12 +64,12 @@ public class ApiAutomation extends BaseClass
 	 */
 	public void postRequest() {
 		String bodyString="{\"title\": \"foo\",\"body\": \"bar\",\"userId\": 1}";
-		Response response = httpRequest.body(bodyString).post("/posts");
+		Response response = httpRequest.contentType(ContentType.JSON).body(bodyString).post("/posts");
 		response.then().assertThat().body(JsonSchemaValidator.matchesJsonSchemaInClasspath("././resources/postSchema.json"));
 		Assert.assertEquals(response.getStatusCode(), 201);
 		int id = response.jsonPath().get("id");
-		System.out.println("Generated id is "+id);
-		
+		Reporter.log("response from postRequest "+response.asString());
+		Reporter.log("Generated id from post is "+id);
 		
 	}
 
@@ -84,6 +86,7 @@ public class ApiAutomation extends BaseClass
 				"}";
 		Response response = httpRequest.contentType(ContentType.JSON).body(requestBody).put("/posts/1");
 		response.then().assertThat().body(JsonSchemaValidator.matchesJsonSchemaInClasspath("././resources/put.json"));
+		Reporter.log("response from putService "+response.asString());
 		Assert.assertEquals(response.getStatusCode(), 200);
 		Assert.assertEquals(response.jsonPath().getInt("id"), 1);
 		Assert.assertEquals(response.jsonPath().getString("title"),"abc");
@@ -98,7 +101,6 @@ public class ApiAutomation extends BaseClass
 	 */
 	public void deleteService() {
 		Response response = httpRequest.delete("/posts/1");
-		System.out.println("response "+response.asString());
 		Assert.assertEquals(response.getStatusCode(), 200);
 		
 	}
